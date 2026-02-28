@@ -1,0 +1,13 @@
+{
+  "name": "devops-health-dashboard",
+  "version": "1.0.0",
+  "description": "Creative DevOps Monitoring Dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "prom-client": "^15.1.0"
+  }
+}
