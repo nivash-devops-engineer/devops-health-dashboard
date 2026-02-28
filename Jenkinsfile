@@ -11,7 +11,7 @@ pipeline {
         stage('Clone') {
             steps {
                 git branch: 'main',
-                url: 'https://github.com/yourusername/devops-health-dashboard.git',
+                url: 'https://github.com/nivash-devops-engineer/devops-health-dashboard.git',
                 credentialsId: 'github-token'
             }
         }
