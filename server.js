@@ -1,39 +1,50 @@
 const express = require('express');
+const os = require('os');
 const client = require('prom-client');
+const path = require('path');
 
 const app = express();
-const port = 5000;
+const PORT = 5000;
 
-// Create a Registry
-const register = new client.Registry();
+// Prometheus default metrics
+client.collectDefaultMetrics();
 
-// Collect default Node.js metrics
-client.collectDefaultMetrics({ register });
-
-// Custom HTTP request counter
+// Custom HTTP counter
 const httpRequestCounter = new client.Counter({
-  name: 'http_requests_total',
-  help: 'Total number of HTTP requests',
+    name: 'http_requests_total',
+    help: 'Total HTTP Requests'
 });
 
-register.registerMetric(httpRequestCounter);
-
-// Middleware to count requests
 app.use((req, res, next) => {
-  httpRequestCounter.inc();
-  next();
+    httpRequestCounter.inc();
+    next();
 });
 
-app.get('/', (req, res) => {
-  res.send("DevOps Health Dashboard Running 🚀");
+app.use(express.static(path.join(__dirname, 'public')));
+
+// API endpoint for system data
+app.get('/api/system', (req, res) => {
+    res.json({
+        hostname: os.hostname(),
+        platform: os.platform(),
+        cpu: os.cpus().length,
+        totalMemory: (os.totalmem() / 1024 / 1024).toFixed(2),
+        freeMemory: (os.freemem() / 1024 / 1024).toFixed(2),
+        uptime: os.uptime()
+    });
 });
 
-// Metrics endpoint
+// Health check
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: "UP" });
+});
+
+// Prometheus metrics
 app.get('/metrics', async (req, res) => {
-  res.set('Content-Type', register.contentType);
-  res.end(await register.metrics());
+    res.set('Content-Type', client.register.contentType);
+    res.end(await client.register.metrics());
 });
 
-app.listen(port, () => {
-  console.log(`App running on port ${port}`);
+app.listen(PORT, () => {
+    console.log(`🚀 DevOps Dashboard running on port ${PORT}`);
 });
